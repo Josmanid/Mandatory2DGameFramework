@@ -12,12 +12,13 @@ namespace Mandatory2DGameFramework.model.defence
         public int ReduceHitPoint { get; set; }
 
         public DefenceItem() {
-            Name = string.Empty;
-            ReduceHitPoint = 0;
+            Name = "Unknown Shield";
+            ReduceHitPoint = 2;
+            Lootable = true;
         }
 
         public override string ToString() {
-            return $"{{{nameof(Name)}={Name}, {nameof(ReduceHitPoint)}={ReduceHitPoint.ToString()}}}";
+            return $"{{Name={Name}, ReduceHitPoint={ReduceHitPoint}}}";
         }
     }
 }
