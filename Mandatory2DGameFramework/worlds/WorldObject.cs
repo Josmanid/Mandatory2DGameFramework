@@ -14,15 +14,13 @@ namespace Mandatory2DGameFramework.worlds
 
         public int X { get; set; }
         public int Y { get; set; }
-        public WorldObject()
-        {
+        public WorldObject() {
             Name = string.Empty;
             Lootable = false;
             Removeable = false;
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             return $"{{{nameof(Name)}={Name}, {nameof(Lootable)}={Lootable.ToString()}, {nameof(Removeable)}={Removeable.ToString()}}}";
         }
     }
