@@ -27,6 +27,22 @@ namespace Mandatory2DGameFramework.worlds
             _worldObjects = new List<WorldObject>();
             _creatures = new List<Creature>();
         }
+        public void AddWorldObject(WorldObject obj) {
+            _worldObjects.Add(obj);
+        }
+
+        public void AddCreature(Creature creature) {
+            _creatures.Add(creature);
+        }
+        public WorldObject? GetObjectAtPosition(int x, int y) {
+            return _worldObjects.FirstOrDefault(o => o.X == x && o.Y == y && !o.IsRemoved);
+        }
+
+        public void RemoveWorldObject(WorldObject obj) {
+            obj.IsRemoved = true;
+            _worldObjects.Remove(obj);
+        }
+
 
         public override string ToString() {
             return $"World Size: {MaxX}x{MaxY}, Difficulty: {GameDifficulty}";

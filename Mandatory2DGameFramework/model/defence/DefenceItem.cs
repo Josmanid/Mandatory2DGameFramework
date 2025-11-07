@@ -9,16 +9,13 @@ namespace Mandatory2DGameFramework.model.defence
 {
     public class DefenceItem : WorldObject
     {
+       
         public int ReduceHitPoint { get; set; }
 
-        public DefenceItem() {
-            Name = "Unknown Shield";
-            ReduceHitPoint = 2;
-            Lootable = true;
-        }
-
-        public override string ToString() {
-            return $"{{Name={Name}, ReduceHitPoint={ReduceHitPoint}}}";
+        public DefenceItem(int x, int y, string name, int reduce)
+            : base(x, y,name, lootable: true) {
+            ReduceHitPoint = reduce;
         }
     }
+
 }

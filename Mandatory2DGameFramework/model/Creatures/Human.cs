@@ -14,8 +14,8 @@ namespace Mandatory2DGameFramework.model.Creatures
         MyLogger logger = MyLogger.Instance;
         public Human() {
             Name = "Human Warrior";
-            Attack = new AttackItem { Name = "Sword", Hit = 20 };
-            Defence = new DefenceItem { Name = "Shield", ReduceHitPoint = 5 };
+            Attack = new AttackItem(0, 0, "Sword of Fury", hit: 20, range: 1);
+            Defence = new DefenceItem(0, 0, "Iron Shield", reduce: 5);
         }
 
     

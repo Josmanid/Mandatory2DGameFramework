@@ -19,6 +19,8 @@ namespace Mandatory2DGameFramework.model.Creatures
         MyLogger logger = MyLogger.Instance;
         public string Name { get; set; }
         public int HitPoint { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
 
 
         // Todo consider how many attack / defence weapons are allowed
@@ -35,12 +37,29 @@ namespace Mandatory2DGameFramework.model.Creatures
         // Template method
         public void PerformAttack(Creature target) {
             logger.LogInfo($"{Name} prepares to attack {target.Name}!");
+
+            if (Attack == null)
+            {
+                logger.LogWarning($"{Name} has no weapon to attack with!");
+                return;
+            }
+
+            
+            int distance = Math.Abs(X - target.X) + Math.Abs(Y - target.Y);
+
+            if (distance > Attack.Range)
+            {
+                logger.LogWarning($"{Name} tried to attack {target.Name}, but is out of range! (Distance: {distance}, Range: {Attack.Range})");
+                return;
+            }
+
             int attackValue = PrepareAttack();
             int finalDamage = CalculateDamage(attackValue, target.Defence);
             target.ReceiveHit(finalDamage);
 
             NotifyObservers(target, finalDamage);
         }
+
 
         //Optional stuff = virtuel?? or should i make it Mandatory = abstract??
         protected virtual int PrepareAttack() {
@@ -71,34 +90,54 @@ namespace Mandatory2DGameFramework.model.Creatures
 
             logger.LogInfo($"[Observer] {Name} hit {target.Name} for {damage} damage.");
         }
+        public void Move(int deltaX, int deltaY, World world) {
+            int newX = X + deltaX;
+            int newY = Y + deltaY;
 
-        public virtual void Loot(WorldObject obj) {
-            if (!obj.Lootable)
+            // Tjek om man bevæger sig udenfor verdens grænser
+            if (newX < 0 || newY < 0 || newX >= world.MaxX || newY >= world.MaxY)
             {
-                logger.LogWarning($"{Name} tried to loot {obj.Name}, but it's not lootable!");
+                logger.LogWarning($"{Name} tried to move outside world boundaries ({newX},{newY}).");
                 return;
             }
 
-            switch (obj)
+            X = newX;
+            Y = newY;
+
+            logger.LogInfo($"{Name} moved to ({X},{Y}).");
+
+            // Tjek om der ligger noget på den nye position
+            var obj = world.GetObjectAtPosition(X, Y);
+            if (obj != null)
             {
-                case AttackItem atk:
-                    Attack = atk;
-                    logger.LogInfo($"{Name} looted a new weapon: {atk.Name} (Hit: {atk.Hit})!");
-                    break;
+                logger.LogInfo($"{Name} found something at ({X},{Y}): {obj.GetType().Name}!");
+            }
+        }
 
-                case DefenceItem def:
-                    Defence = def;
-                    logger.LogInfo($"{Name} looted new armor: {def.Name} (Defence: {def.ReduceHitPoint})!");
-                    break;
 
-                default:
-                    logger.LogInfo($"{Name} looted {obj.Name}.");
-                    break;
+        public void Loot(World world) {
+            var obj = world.GetObjectAtPosition(X, Y);
+            if (obj == null)
+            {
+                logger.LogWarning($"{Name} tried to loot, but found nothing at ({X},{Y}).");
+                return;
             }
 
-            if (obj.Removeable)
+            if (obj is AttackItem attack)
             {
-                logger.LogInfo($"{obj.Name} was removed from the world after being looted.");
+                Attack = attack;
+                logger.LogInfo($"{Name} looted a new weapon: {attack.Name} (Hit: {attack.Hit})!");
+                world.RemoveWorldObject(obj);
+            }
+            else if (obj is DefenceItem defence)
+            {
+                Defence = defence;
+                logger.LogInfo($"{Name} looted new armor: {defence.Name} (Defence: {defence.ReduceHitPoint})!");
+                world.RemoveWorldObject(obj);
+            }
+            else
+            {
+                logger.LogInfo($"{Name} found an object at ({X},{Y}), but couldn’t use it.");
             }
         }
         protected virtual void Die() {
