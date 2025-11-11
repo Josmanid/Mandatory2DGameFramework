@@ -1,6 +1,7 @@
 ﻿using Mandatory2DGameFramework.Logging;
 using Mandatory2DGameFramework.model.attack;
 using Mandatory2DGameFramework.model.defence;
+using Mandatory2DGameFramework.Observer;
 using Mandatory2DGameFramework.worlds;
 using System;
 using System.Collections.Generic;
@@ -14,14 +15,14 @@ namespace Mandatory2DGameFramework.model.Creatures
     /// Creature class functions as the template.
     /// It defines the sequence of steps, but lets subclasses override specific steps if they need custom behavior.
     /// </summary>
-    public abstract class Creature
+    public abstract class Creature 
     {
         MyLogger logger = MyLogger.Instance;
         public string Name { get; set; }
         public int HitPoint { get; set; }
-        public int X { get; set; }
-        public int Y { get; set; }
-
+        public int PositionX { get; set; }
+        public int PositionY { get; set; }
+        private List<ICreatureObserver> _observers = new List<ICreatureObserver>();
 
         // Todo consider how many attack / defence weapons are allowed
         public AttackItem? Attack { get; set; }
@@ -44,8 +45,8 @@ namespace Mandatory2DGameFramework.model.Creatures
                 return;
             }
 
-            
-            int distance = Math.Abs(X - target.X) + Math.Abs(Y - target.Y);
+
+            int distance = Math.Abs(PositionX - target.PositionX) + Math.Abs(PositionY - target.PositionY);
 
             if (distance > Attack.Range)
             {
@@ -70,7 +71,8 @@ namespace Mandatory2DGameFramework.model.Creatures
             HitPoint -= hit;
             logger.LogInfo($"{Name} received {hit} damage! Remaining HP: {HitPoint}");
 
-            if (HitPoint <= 0) {
+            if (HitPoint <= 0)
+            {
 
                 Die();
             }
@@ -87,64 +89,85 @@ namespace Mandatory2DGameFramework.model.Creatures
         }
 
         protected virtual void NotifyObservers(Creature target, int damage) {
-
-            logger.LogInfo($"[Observer] {Name} hit {target.Name} for {damage} damage.");
+            foreach (var observer in _observers)
+            {
+                observer.OnCreatureHit(this, target, damage);
+            }
+            
         }
         public void Move(int deltaX, int deltaY, World world) {
-            int newX = X + deltaX;
-            int newY = Y + deltaY;
+            int newX = PositionX + deltaX;
+            int newY = PositionY + deltaY;
 
-            // Tjek om man bevæger sig udenfor verdens grænser
-            if (newX < 0 || newY < 0 || newX >= world.MaxX || newY >= world.MaxY)
+            if (world.CanMoveTo(newX, newY))
             {
-                logger.LogWarning($"{Name} tried to move outside world boundaries ({newX},{newY}).");
-                return;
-            }
+                PositionX = newX;
+                PositionY = newY;
+                logger.LogInfo($"{Name} moved to ({PositionX},{PositionY}).");
 
-            X = newX;
-            Y = newY;
-
-            logger.LogInfo($"{Name} moved to ({X},{Y}).");
-
-            // Tjek om der ligger noget på den nye position
-            var obj = world.GetObjectAtPosition(X, Y);
-            if (obj != null)
-            {
-                logger.LogInfo($"{Name} found something at ({X},{Y}): {obj.GetType().Name}!");
-            }
-        }
-
-
-        public void Loot(World world) {
-            var obj = world.GetObjectAtPosition(X, Y);
-            if (obj == null)
-            {
-                logger.LogWarning($"{Name} tried to loot, but found nothing at ({X},{Y}).");
-                return;
-            }
-
-            if (obj is AttackItem attack)
-            {
-                Attack = attack;
-                logger.LogInfo($"{Name} looted a new weapon: {attack.Name} (Hit: {attack.Hit})!");
-                world.RemoveWorldObject(obj);
-            }
-            else if (obj is DefenceItem defence)
-            {
-                Defence = defence;
-                logger.LogInfo($"{Name} looted new armor: {defence.Name} (Defence: {defence.ReduceHitPoint})!");
-                world.RemoveWorldObject(obj);
+                // check for lootable
+                var loot = world.GetObjectAtPosition(PositionX, PositionY);
+                if (loot != null)
+                {
+                    Loot(world);
+                }
             }
             else
             {
-                logger.LogInfo($"{Name} found an object at ({X},{Y}), but couldn’t use it.");
+                logger.LogWarning($"{Name} cannot move outside the world boundaries!");
             }
         }
+
+
+
+        // inside Creature class
+        public void Loot(World world) {
+            // find a lootable object at the creature's current position
+            var loot = world.GetObjectAtPosition(PositionX, PositionY);
+            if (loot == null)
+            {
+                logger.LogInfo($"{Name} found nothing to loot at ({PositionX},{PositionY}).");
+                return;
+            }
+
+            if (loot is AttackItem weapon)
+            {
+                Attack = weapon;
+                logger.LogInfo($"{Name} looted a new weapon: {weapon.Name} (Hit: {weapon.Hit})!");
+                world.RemoveWorldObject(loot);
+            }
+            else if (loot is DefenceItem shield)
+            {
+                Defence = shield;
+                logger.LogInfo($"{Name} looted new armor: {shield.Name} (Defence: {shield.ReduceHitPoint})!");
+                world.RemoveWorldObject(loot);
+            }
+            else
+            {
+                logger.LogInfo($"{Name} looted {loot.Name} at ({PositionX},{PositionY}).");
+                world.RemoveWorldObject(loot);
+            }
+        }
+
+
         protected virtual void Die() {
             logger.LogWarning($"{Name} has fallen in battle!");
+        }
+
+
+        public void AddObserver(ICreatureObserver observer) {
+            if (!_observers.Contains(observer))
+                _observers.Add(observer);
+        }
+
+        public void RemoveObserver(ICreatureObserver observer) {
+            if (_observers.Contains(observer))
+                _observers.Remove(observer);
         }
         public override string ToString() {
             return $"{{Name={Name}, HitPoint={HitPoint}, Attack={Attack}, Defence={Defence}}}";
         }
+
+      
     }
 }

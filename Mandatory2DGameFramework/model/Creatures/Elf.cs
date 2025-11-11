@@ -15,7 +15,7 @@ namespace Mandatory2DGameFramework.model.Creatures
         public Elf() {
             Name = "Elf on the shelf";
             Attack = new AttackItem(0, 0, "Elven Bow", hit: 10, range: 3);
-            Defence = new DefenceItem(0, 0, "Leather Armor",reduce: 5);
+            Defence = new DefenceItem(0, 0, "Leather Armor", reduce: 5);
         }
 
         protected override int PrepareAttack() {
