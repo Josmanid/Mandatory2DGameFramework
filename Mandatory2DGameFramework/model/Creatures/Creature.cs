@@ -34,7 +34,7 @@ namespace Mandatory2DGameFramework.model.Creatures
             HitPoint = 100;
 
             _lootStrategies[typeof(AttackItem)] = new WeaponLootStrategy();
-            _lootStrategies[typeof(DefenceItem)] = new WeaponLootStrategy();
+            _lootStrategies[typeof(DefenceItem)] = new ArmourLootStrategy();
 
         }
 
