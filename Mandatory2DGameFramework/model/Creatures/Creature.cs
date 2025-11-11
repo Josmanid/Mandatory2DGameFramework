@@ -2,6 +2,7 @@
 using Mandatory2DGameFramework.model.attack;
 using Mandatory2DGameFramework.model.defence;
 using Mandatory2DGameFramework.Observer;
+using Mandatory2DGameFramework.Strategy;
 using Mandatory2DGameFramework.worlds;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Mandatory2DGameFramework.model.Creatures
     /// Creature class functions as the template.
     /// It defines the sequence of steps, but lets subclasses override specific steps if they need custom behavior.
     /// </summary>
-    public abstract class Creature 
+    public abstract class Creature
     {
         MyLogger logger = MyLogger.Instance;
         public string Name { get; set; }
@@ -23,7 +24,7 @@ namespace Mandatory2DGameFramework.model.Creatures
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         private List<ICreatureObserver> _observers = new List<ICreatureObserver>();
-
+        private readonly Dictionary<Type, ILootStrategy> _lootStrategies = new Dictionary<Type, ILootStrategy>();
         // Todo consider how many attack / defence weapons are allowed
         public AttackItem? Attack { get; set; }
         public DefenceItem? Defence { get; set; }
@@ -31,6 +32,9 @@ namespace Mandatory2DGameFramework.model.Creatures
         public Creature() {
             Name = string.Empty;
             HitPoint = 100;
+
+            _lootStrategies[typeof(AttackItem)] = new WeaponLootStrategy();
+            _lootStrategies[typeof(DefenceItem)] = new WeaponLootStrategy();
 
         }
 
@@ -93,7 +97,7 @@ namespace Mandatory2DGameFramework.model.Creatures
             {
                 observer.OnCreatureHit(this, target, damage);
             }
-            
+
         }
         public void Move(int deltaX, int deltaY, World world) {
             int newX = PositionX + deltaX;
@@ -129,23 +133,15 @@ namespace Mandatory2DGameFramework.model.Creatures
                 logger.LogInfo($"{Name} found nothing to loot at ({PositionX},{PositionY}).");
                 return;
             }
-
-            if (loot is AttackItem weapon)
+            var lootType = loot.GetType();
+            if (_lootStrategies.TryGetValue(lootType, out var strategy))
             {
-                Attack = weapon;
-                logger.LogInfo($"{Name} looted a new weapon: {weapon.Name} (Hit: {weapon.Hit})!");
-                world.RemoveWorldObject(loot);
-            }
-            else if (loot is DefenceItem shield)
-            {
-                Defence = shield;
-                logger.LogInfo($"{Name} looted new armor: {shield.Name} (Defence: {shield.ReduceHitPoint})!");
-                world.RemoveWorldObject(loot);
+                strategy.LootItem(this, world, loot);
             }
             else
             {
-                logger.LogInfo($"{Name} looted {loot.Name} at ({PositionX},{PositionY}).");
-                world.RemoveWorldObject(loot);
+                logger.LogWarning($"No loot strategy defined for {loot.GetType().Name}!");
+
             }
         }
 
@@ -168,6 +164,6 @@ namespace Mandatory2DGameFramework.model.Creatures
             return $"{{Name={Name}, HitPoint={HitPoint}, Attack={Attack}, Defence={Defence}}}";
         }
 
-      
+
     }
 }
