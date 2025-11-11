@@ -108,13 +108,6 @@ namespace Mandatory2DGameFramework.model.Creatures
                 PositionX = newX;
                 PositionY = newY;
                 logger.LogInfo($"{Name} moved to ({PositionX},{PositionY}).");
-
-                // check for lootable
-                var loot = world.GetObjectAtPosition(PositionX, PositionY);
-                if (loot != null)
-                {
-                    Loot(world);
-                }
             }
             else
             {
@@ -124,26 +117,29 @@ namespace Mandatory2DGameFramework.model.Creatures
 
 
 
-        // inside Creature class
         public void Loot(World world) {
-            // find a lootable object at the creature's current position
             var loot = world.GetObjectAtPosition(PositionX, PositionY);
+
             if (loot == null)
             {
+
                 logger.LogInfo($"{Name} found nothing to loot at ({PositionX},{PositionY}).");
                 return;
             }
+
             var lootType = loot.GetType();
-            if (_lootStrategies.TryGetValue(lootType, out var strategy))
+            if (_lootStrategies.TryGetValue(lootType, out ILootStrategy strategy))
             {
                 strategy.LootItem(this, world, loot);
             }
             else
             {
-                logger.LogWarning($"No loot strategy defined for {loot.GetType().Name}!");
-
+                logger.LogWarning($"No loot strategy defined for {lootType.Name}! Using NotFoundStrategy as fallback.");
+               
             }
         }
+
+
 
 
         protected virtual void Die() {
