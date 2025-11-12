@@ -26,7 +26,7 @@ namespace Mandatory2DGameFramework.model.attack
         }
 
         public static bool operator <(AttackItem a, AttackItem b) {
-            return a.Range < b.Range;
+            return a.Hit < b.Hit;
         }
 
         public void Display() {
