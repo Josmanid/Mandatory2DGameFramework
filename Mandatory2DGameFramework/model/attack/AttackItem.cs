@@ -21,6 +21,13 @@ namespace Mandatory2DGameFramework.model.attack
             Range = range;
         }
 
+        public static bool operator >(AttackItem a, AttackItem b) {
+            return a.Hit > b.Hit;
+        }
+
+        public static bool operator <(AttackItem a, AttackItem b) {
+            return a.Range < b.Range;
+        }
 
         public void Display() {
             logger.LogInfo($"{Name} have {Hit} points and {Range} range.");

@@ -16,11 +16,20 @@ namespace Mandatory2DGameFramework.Strategy
         public void LootItem(Creature creature, World world, WorldObject loot) {
             if (loot is AttackItem weapon)
             {
-                creature.Attack = weapon;
-                logger.LogInfo($"{creature.Name} looted a new weapon: {weapon.Name} " +
-                    $"with Hit: {weapon.Hit} and range: {weapon.Range}");
-                world.RemoveWorldObject(loot);
+                if (creature.Attack == null || weapon > creature.Attack)
+                {
+                    creature.Attack = weapon;
+                    logger.LogInfo($"{creature.Name} looted a new weapon: {weapon.Name} " +
+                        $"with Hit: {weapon.Hit} and range: {weapon.Range}");
+                    world.RemoveWorldObject(loot);
+
+                }
+                else
+                {
+                    logger.LogInfo($"{creature.Name} found {weapon.Name}, but it's weaker than current weapon.");
+                }
             }
+
         }
     }
 }
