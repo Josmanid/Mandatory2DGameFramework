@@ -24,6 +24,7 @@ namespace Mandatory2DGameFramework.Strategy
                     world.RemoveWorldObject(loot);
 
                 }
+
                 else
                 {
                     logger.LogInfo($"{creature.Name} found {weapon.Name}, but it's weaker than current weapon.");
