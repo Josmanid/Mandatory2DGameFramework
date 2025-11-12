@@ -13,7 +13,7 @@ namespace Mandatory2DGameFramework.model.defence
     {
         MyLogger logger = MyLogger.Instance;
 
-        public int ReduceHitPoint { get; set; }
+        public int ReduceHitPoint { get; private set; }
 
 
         public DefenceItem(int x, int y, string name, int reduce)
