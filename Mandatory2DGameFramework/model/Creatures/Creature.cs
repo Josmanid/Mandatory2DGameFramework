@@ -128,7 +128,7 @@ namespace Mandatory2DGameFramework.model.Creatures
             }
 
             var lootType = loot.GetType();
-            if (_lootStrategies.TryGetValue(lootType, out ILootStrategy strategy))
+            if (_lootStrategies.TryGetValue(lootType, out ILootStrategy? strategy))
             {
                 strategy.LootItem(this, world, loot);
             }
