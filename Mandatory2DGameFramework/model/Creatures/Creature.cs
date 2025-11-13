@@ -13,8 +13,10 @@ using System.Threading.Tasks;
 namespace Mandatory2DGameFramework.model.Creatures
 {
     /// <summary>
-    /// Creature class functions as the template.
-    /// It defines the sequence of steps, but lets subclasses override specific steps if they need custom behavior.
+    /// Abstract base class representing a creature in the game world.
+    /// Implements the Template Method pattern to define the basic flow of an attack.
+    /// Subclasses can override specific steps (e.g., PrepareAttack or ReceiveHit) for custom behavior.
+    /// Also acts as an Observable subject in the Observer pattern.
     /// </summary>
     public abstract class Creature
     {
@@ -25,7 +27,7 @@ namespace Mandatory2DGameFramework.model.Creatures
         public int PositionY { get; set; }
         private List<ICreatureObserver> _observers = new List<ICreatureObserver>();
         private readonly Dictionary<Type, ILootStrategy> _lootStrategies = new Dictionary<Type, ILootStrategy>();
-        // Todo consider how many attack / defence weapons are allowed
+       
         public AttackItem? Attack { get; set; }
         public DefenceItem? Defence { get; set; }
 
@@ -39,7 +41,7 @@ namespace Mandatory2DGameFramework.model.Creatures
         }
 
 
-        // Template method
+       
         public void PerformAttack(Creature target) {
             logger.LogInfo($"{Name} prepares to attack {target.Name}!");
 
@@ -66,7 +68,7 @@ namespace Mandatory2DGameFramework.model.Creatures
         }
 
 
-        //Optional stuff = virtuel?? or should i make it Mandatory = abstract??
+       
         protected virtual int PrepareAttack() {
             return Attack?.Hit ?? 10;
         }

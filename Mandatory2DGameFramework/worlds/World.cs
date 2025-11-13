@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace Mandatory2DGameFramework.worlds
 {
+    /// <summary>
+    /// Represents the game world grid that contains creatures and world objects.
+    /// Responsible for bounds checking and storing world objects / creatures.
+    /// </summary>
     public class World
     {
         public int MaxX { get; private set; }

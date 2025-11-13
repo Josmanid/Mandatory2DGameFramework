@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Mandatory2DGameFramework.model.defence
 {
+  
     public class DefenceItem : WorldObject, IDefenceItem
     {
         MyLogger logger = MyLogger.Instance;
