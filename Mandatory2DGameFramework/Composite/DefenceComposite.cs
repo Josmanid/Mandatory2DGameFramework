@@ -31,7 +31,7 @@ namespace Mandatory2DGameFramework.Composite
         public DefenceComposite(string name) {
             Name = name;
         }
-        // need to make en add and delete to the list
+      
         public void Add(IDefenceItem item) {
             _defenceItems.Add(item);
         }

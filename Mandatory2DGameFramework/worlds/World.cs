@@ -19,9 +19,9 @@ namespace Mandatory2DGameFramework.worlds
         public int MaxY { get; private set; }
         public string GameDifficulty { get; private set; }
 
-        // world objects
+     
         private List<WorldObject> _worldObjects;
-        // world creatures
+  
         private List<Creature> _creatures;
 
         public World(GameConfig config) {
